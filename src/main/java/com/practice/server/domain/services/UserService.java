@@ -71,4 +71,11 @@ public class UserService implements IUserService {
 
         return jwtTokenProvider.generateToken(username, role);
     }
+
+    @Override
+    public Boolean validateToken(String token) {
+        return jwtTokenProvider.validateToken(token);
+    }
+
+
 }

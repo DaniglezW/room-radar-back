@@ -8,5 +8,6 @@ public interface IUserService {
     void register(RegisterRequest request);
     String login(LoginRequest request);
     String refreshToken(String refreshToken);
+    Boolean validateToken(String token);
 
 }
