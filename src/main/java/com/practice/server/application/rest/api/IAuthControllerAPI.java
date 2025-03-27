@@ -1,10 +1,12 @@
 package com.practice.server.application.rest.api;
 
-import com.practice.server.application.dto.request.LoginRequest;
-import com.practice.server.application.dto.request.RegisterRequest;
-import com.practice.server.application.dto.response.PracticeResponse;
+import com.practice.server.application.request.LoginRequest;
+import com.practice.server.application.request.RegisterRequest;
+import com.practice.server.application.response.PracticeResponse;
+import com.practice.server.application.response.UserResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,5 +27,8 @@ public interface IAuthControllerAPI {
 
     @PostMapping("/verify")
     ResponseEntity<Boolean> verify(String token);
+
+    @GetMapping("/me")
+    ResponseEntity<UserResponse> getCurrentUser(String token);
 
 }

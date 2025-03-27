@@ -1,11 +1,14 @@
 package com.practice.server.application.rest;
 
+import com.practice.server.application.dto.UserDTO;
 import com.practice.server.application.exception.PracticeException;
 import com.practice.server.application.constants.Constants;
-import com.practice.server.application.dto.request.LoginRequest;
-import com.practice.server.application.dto.request.RegisterRequest;
-import com.practice.server.application.dto.response.PracticeResponse;
+import com.practice.server.application.request.LoginRequest;
+import com.practice.server.application.request.RegisterRequest;
+import com.practice.server.application.response.PracticeResponse;
+import com.practice.server.application.response.UserResponse;
 import com.practice.server.application.rest.api.IAuthControllerAPI;
+import com.practice.server.application.utils.JwtTokenProvider;
 import com.practice.server.domain.services.interfaces.IUserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +25,12 @@ public class AuthController implements IAuthControllerAPI {
 
     private final IUserService userService;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Autowired
-    public AuthController(IUserService userService) {
+    public AuthController(IUserService userService, JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -74,4 +80,26 @@ public class AuthController implements IAuthControllerAPI {
             return ResponseEntity.status(500).body(false);
         }
     }
+
+    @Override
+    public ResponseEntity<UserResponse> getCurrentUser(@CookieValue(value = "token", required = false) String token) {
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new UserResponse(401, "Token missing"));
+        }
+        String username;
+        try {
+            username = jwtTokenProvider.getUsernameFromToken(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new UserResponse(401, "Invalid token"));
+        }
+
+        UserDTO userDTO = userService.getUserByUsername(username);
+        UserResponse response = new UserResponse(200, "User found");
+        response.setUser(userDTO);
+
+        return ResponseEntity.ok(response);
+    }
+
 }

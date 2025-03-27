@@ -1,4 +1,4 @@
-package com.practice.server.application.dto.response;
+package com.practice.server.application.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +25,8 @@ public class PracticeResponse {
     @Schema(description = "Fecha de finalización",
             example = "2024-05-24T12:00:00")
     protected LocalDateTime ts;
+
+    public PracticeResponse() {}
 
     public PracticeResponse(int code, String message) {
         this.code = code;

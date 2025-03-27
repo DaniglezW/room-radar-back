@@ -1,7 +1,8 @@
 package com.practice.server.domain.services;
 
-import com.practice.server.application.dto.request.LoginRequest;
-import com.practice.server.application.dto.request.RegisterRequest;
+import com.practice.server.application.dto.UserDTO;
+import com.practice.server.application.request.LoginRequest;
+import com.practice.server.application.request.RegisterRequest;
 import com.practice.server.application.utils.JwtTokenProvider;
 import com.practice.server.domain.model.Role;
 import com.practice.server.domain.model.User;
@@ -77,5 +78,22 @@ public class UserService implements IUserService {
         return jwtTokenProvider.validateToken(token);
     }
 
+    @Override
+    public UserDTO getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return mapToDTO(user);
+    }
+
+    private UserDTO mapToDTO(User user) {
+        return new UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole(),
+                user.getCreatedAt()
+        );
+    }
 
 }
