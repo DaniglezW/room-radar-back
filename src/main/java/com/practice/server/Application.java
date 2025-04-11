@@ -12,9 +12,9 @@ public class Application {
 
         SpringApplication.run(Application.class, args);
 
-        log.info("*************************************");
-        log.info("**    ARRANCADO PRACTICE SERVER    **");
-        log.info("*************************************");
+        log.info("************************************");
+        log.info("**       ROOM-RADAR STARTED       **");
+        log.info("************************************");
 
     }
 

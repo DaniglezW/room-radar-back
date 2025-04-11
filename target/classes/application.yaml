@@ -3,12 +3,14 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://ep-autumn-bar-a2m4g6mk-pooler.eu-central-1.aws.neon.tech:5432/verceldb?sslmode=require
-    username: default
-    password: aciOD76oYnkL
+    url: jdbc:postgresql://ep-quiet-brook-abf62bd9-pooler.eu-west-2.aws.neon.tech:5432/neondb?sslmode=require
+    username: neondb_owner
+    password: npg_gv50wKmzYyAs
     driver-class-name: org.postgresql.Driver
     initialization-mode: always
   jpa:
+    hibernate:
+      ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     properties:

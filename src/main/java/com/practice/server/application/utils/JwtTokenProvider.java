@@ -1,6 +1,6 @@
 package com.practice.server.application.utils;
 
-import com.practice.server.domain.model.Role;
+import com.practice.server.domain.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -24,9 +24,9 @@ public class JwtTokenProvider {
         this.tokenValidity = tokenValidity;
     }
 
-    public String generateToken(String username, Role role) {
+    public String generateToken(String email, Role role) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .claim("roles", role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + tokenValidity))
