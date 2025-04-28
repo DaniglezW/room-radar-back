@@ -7,8 +7,12 @@ public final class Constants {
     }
 
     public static final String HOTEL_API_BASE = "/api/hotel/v1";
-
-    public static final String AUTH = "/auth";
+    public static final String HOTEL_IMAGE_API_BASE = "/api/hotel-image/v1";
+    public static final String ROOM_API_BASE = "/api/room/v1";
+    public static final String ROOM_IMAGE_API_BASE = "/api/room-image/v1";
+    public static final String RESERVATION_API_BASE = "/api/reservation/v1";
+    public static final String RESERVATION_HISTORY_API_BASE = "/api/reservation-history/v1";
+    public static final String AUTH = "/api/auth";
 
 
 

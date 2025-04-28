@@ -1,6 +1,6 @@
 package com.practice.server.application.utils;
 
-import com.practice.server.domain.enums.Role;
+import com.practice.server.application.model.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

@@ -1,6 +1,6 @@
 package com.practice.server.application.dto;
 
-import com.practice.server.domain.enums.Role;
+import com.practice.server.application.model.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
