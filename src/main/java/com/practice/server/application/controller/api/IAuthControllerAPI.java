@@ -33,4 +33,7 @@ public interface IAuthControllerAPI {
     @GetMapping("/me")
     ResponseEntity<UserResponse> getCurrentUser(String token);
 
+    @PostMapping("/logout")
+    ResponseEntity<Void> logout(HttpServletResponse response);
+
 }

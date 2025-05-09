@@ -1,5 +1,6 @@
 package com.practice.server.application.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +33,10 @@ public class Hotel {
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelImage> images = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "hotel")
+    private List<Review> reviews;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

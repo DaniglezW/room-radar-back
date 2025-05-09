@@ -10,14 +10,19 @@ import com.practice.server.application.dto.response.UserResponse;
 import com.practice.server.application.controller.api.IAuthControllerAPI;
 import com.practice.server.application.utils.JwtTokenProvider;
 import com.practice.server.application.service.interfaces.IUserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Duration;
 
 @Slf4j
 @RestController
@@ -49,7 +54,15 @@ public class AuthController implements IAuthControllerAPI {
         log.info("Entering into login controller");
         try {
             String token = userService.login(request);
-            response.setHeader("Set-Cookie", "token=" + token + "; Secure; SameSite=Strict; Path=/; Max-Age=3600");
+            ResponseCookie cookie = ResponseCookie.from("token", token)
+                    .httpOnly(true)
+                    .secure(false)
+                    .sameSite("Strict")
+                    .path("/")
+                    .maxAge(Duration.ofHours(1))
+                    .build();
+
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
             return ResponseEntity.ok(new PracticeResponse(0,"Successful login"));
         } catch (Exception e) {
             throw new PracticeException(Constants.ERROR_CODE, "Error during login: " + e.getMessage());
@@ -101,6 +114,18 @@ public class AuthController implements IAuthControllerAPI {
 
         log.info("User : " + userDTO);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+
+        return ResponseEntity.noContent().build();
     }
 
 }
