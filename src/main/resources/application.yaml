@@ -1,0 +1,58 @@
+server:
+  port: 8082
+  tomcat:
+    max-http-header-size: 64KB
+    max-http-post-size: 52428800
+    max-swallow-size: 52428800
+  compression:
+    enabled: false
+
+spring:
+  datasource:
+    url: jdbc:postgresql://ep-quiet-brook-abf62bd9-pooler.eu-west-2.aws.neon.tech:5432/neondb?sslmode=require
+    username: neondb_owner
+    password: npg_gv50wKmzYyAs
+    driver-class-name: org.postgresql.Driver
+    initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        ddl-auto: update
+        format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  web:
+    resources:
+      cache:
+        period: 3600
+  main:
+    allow-circular-references: true
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+default:
+  image:
+    path: public/images/
+
+# Ubicación de los scripts de inicialización
+# spring.sql.init.mode: always
+# spring.sql.init.schema-locations: classpath:schema.sql
+# spring.sql.init.data-locations: classpath:data.sql
+
+# Configuración para Email (comentada)
+# spring.mail.host: smtp.gmail.com
+# spring.mail.port: 587
+# spring.mail.username: machansonexpress@gmail.com
+# spring.mail.password: ijxapmpksulldrho
+# spring.mail.properties.mail.smtp.auth: true
+# spring.mail.properties.mail.smtp.starttls.enable: true
+# spring.mail.properties.mail.smtp.starttls.required: true
