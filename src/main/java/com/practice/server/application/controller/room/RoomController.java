@@ -1,6 +1,7 @@
 package com.practice.server.application.controller.room;
 
 import com.practice.server.application.controller.api.IRoomController;
+import com.practice.server.application.dto.RoomDto;
 import com.practice.server.application.dto.response.RoomListResponse;
 import com.practice.server.application.dto.response.RoomResponse;
 import com.practice.server.application.model.entity.Room;
@@ -9,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,4 +60,10 @@ public class RoomController implements IRoomController {
         iroomService.deleteRoom(roomId);
         return ResponseEntity.noContent().build();
     }
+
+    @Override
+    public ResponseEntity<List<RoomDto>> getRoomsByHotelWithOptionalAvailability(Long hotelId, LocalDate checkIn, LocalDate checkOut) {
+        return null;
+    }
+
 }

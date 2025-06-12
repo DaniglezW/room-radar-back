@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "hotels")
@@ -33,6 +35,15 @@ public class Hotel {
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelImage> images = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "hotel_services",
+            joinColumns = @JoinColumn(name = "hotel_id"),
+            inverseJoinColumns = @JoinColumn(name = "service_id")
+    )
+    @JsonIgnore
+    private Set<Service> services = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "hotel")
