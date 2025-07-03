@@ -58,12 +58,12 @@ public class RoomController implements IRoomController {
     @Override
     public ResponseEntity<Void> deleteRoom(Long roomId) {
         iroomService.deleteRoom(roomId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<List<RoomDto>> getRoomsByHotelWithOptionalAvailability(Long hotelId, LocalDate checkIn, LocalDate checkOut) {
-        return null;
+        return ResponseEntity.ok(iroomService.getRoomsByHotelWithOptionalAvailability(hotelId, checkIn, checkOut));
     }
 
 }

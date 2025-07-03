@@ -1,5 +1,6 @@
 package com.practice.server.application.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,13 +26,16 @@ public class Review {
     private LocalDateTime createdAt;
 
     @ManyToOne
+    @JsonIgnore
     private User user;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
     @ManyToOne
+    @JsonIgnore
     private Reservation reservation;
 
 }

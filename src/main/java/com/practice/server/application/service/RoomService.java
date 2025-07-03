@@ -1,5 +1,6 @@
 package com.practice.server.application.service;
 
+import com.practice.server.application.dto.RoomDto;
 import com.practice.server.application.exception.ResourceNotFoundException;
 import com.practice.server.application.model.entity.Hotel;
 import com.practice.server.application.model.entity.Room;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -63,5 +65,21 @@ public class RoomService implements IRoomService {
     public void deleteRoom(Long id) {
         Room room = getRoomById(id);
         roomRepository.delete(room);
+    }
+
+    @Override
+    public List<RoomDto> getRoomsByHotelWithOptionalAvailability(Long hotelId, LocalDate checkIn, LocalDate checkOut) {
+        List<Room> availableRooms = roomRepository.findAvailableRoomsByHotelAndDateRange(hotelId, checkIn, checkOut);
+        return availableRooms.stream()
+                .map(room -> new RoomDto(
+                        room.getId(),
+                        room.getRoomNumber(),
+                        room.getType(),
+                        room.getPricePerNight(),
+                        room.getAvailable(),
+                        room.getMaxGuests(),
+                        room.getImages() != null ? room.getImages() : List.of()
+                ))
+                .toList();
     }
 }

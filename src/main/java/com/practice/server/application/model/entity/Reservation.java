@@ -1,5 +1,6 @@
 package com.practice.server.application.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.practice.server.application.model.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,10 +33,12 @@ public class Reservation {
     private ReservationStatus status; // PENDING, CONFIRMED, CANCELLED.
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "room_id")
     private Room room;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "user_id")
     private User user;
 

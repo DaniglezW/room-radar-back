@@ -39,7 +39,7 @@ public interface IRoomController {
     ResponseEntity<Void> deleteRoom(@PathVariable Long roomId);
 
     @GetMapping("/by-hotel")
-    public ResponseEntity<List<RoomDto>> getRoomsByHotelWithOptionalAvailability(
+    ResponseEntity<List<RoomDto>> getRoomsByHotelWithOptionalAvailability(
             @RequestParam Long hotelId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut
