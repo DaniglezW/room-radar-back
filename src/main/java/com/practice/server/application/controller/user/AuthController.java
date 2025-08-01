@@ -1,6 +1,7 @@
 package com.practice.server.application.controller.user;
 
 import com.practice.server.application.dto.UserDTO;
+import com.practice.server.application.dto.request.SocialLoginRequest;
 import com.practice.server.application.exception.PracticeException;
 import com.practice.server.application.constants.Constants;
 import com.practice.server.application.dto.request.LoginRequest;
@@ -10,7 +11,6 @@ import com.practice.server.application.dto.response.UserResponse;
 import com.practice.server.application.controller.api.IAuthControllerAPI;
 import com.practice.server.application.utils.JwtTokenProvider;
 import com.practice.server.application.service.interfaces.IUserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
+
+import static com.practice.server.application.constants.Constants.GOOGLE;
+import static com.practice.server.application.constants.Constants.SET_COOKIE;
 
 @Slf4j
 @RestController
@@ -112,20 +115,34 @@ public class AuthController implements IAuthControllerAPI {
         UserResponse response = new UserResponse(200, "User found");
         response.setUser(userDTO);
 
-        log.info("User : " + userDTO);
+        log.info("User : {}", userDTO);
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", null);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);
+        log.info("Entering into logout controller");
 
-        response.addCookie(cookie);
+        response.setHeader(SET_COOKIE, "token=; Secure; SameSite=Strict; Path=/; Max-Age=0");
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<PracticeResponse> socialLogin(@RequestBody SocialLoginRequest request, HttpServletResponse response) {
+        log.info("Entering into unified socialLogin controller for provider {}", request.getProvider());
+        try {
+            if (GOOGLE.equalsIgnoreCase(request.getProvider())) {
+                PracticeResponse resp = userService.handleGoogleLoginOrRegister(request.getIdToken(), response);
+                return ResponseEntity.ok(resp);
+            } else {
+                throw new PracticeException(400, "Proveedor no soportado: " + request.getProvider());
+            }
+        } catch (PracticeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PracticeException(500, "Error en socialLogin: " + e.getMessage());
+        }
     }
 
 }

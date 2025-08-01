@@ -18,6 +18,7 @@ public class UserDTO {
     private String phoneNumber;
     private Role role;
     private byte[] profilePicture;
+    private String googleProfilePictureUrl;
     private LocalDateTime createdAt;
 
 }

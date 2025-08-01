@@ -34,6 +34,10 @@ spring:
         period: 3600
   main:
     allow-circular-references: true
+
+google:
+  client-id: ${GOOGLE_CLIENT_ID}
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

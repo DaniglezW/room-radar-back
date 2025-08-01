@@ -3,6 +3,7 @@ package com.practice.server.application.controller.api;
 import com.practice.server.application.annotations.Authenticated;
 import com.practice.server.application.dto.request.LoginRequest;
 import com.practice.server.application.dto.request.RegisterRequest;
+import com.practice.server.application.dto.request.SocialLoginRequest;
 import com.practice.server.application.dto.response.PracticeResponse;
 import com.practice.server.application.dto.response.UserResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,5 +36,8 @@ public interface IAuthControllerAPI {
 
     @PostMapping("/logout")
     ResponseEntity<Void> logout(HttpServletResponse response);
+
+    @PostMapping("/social-login")
+    ResponseEntity<PracticeResponse> socialLogin(@RequestBody SocialLoginRequest request, HttpServletResponse response);
 
 }

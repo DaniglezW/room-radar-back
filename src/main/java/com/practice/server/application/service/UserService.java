@@ -1,26 +1,39 @@
 package com.practice.server.application.service;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.practice.server.application.dto.UserDTO;
 import com.practice.server.application.dto.request.LoginRequest;
 import com.practice.server.application.dto.request.RegisterRequest;
+import com.practice.server.application.dto.response.PracticeResponse;
 import com.practice.server.application.exception.PracticeException;
 import com.practice.server.application.utils.JwtTokenProvider;
 import com.practice.server.application.model.enums.Role;
 import com.practice.server.application.model.entity.User;
 import com.practice.server.application.service.interfaces.IUserService;
 import com.practice.server.application.repository.UsersRepository;
+import com.practice.server.application.utils.MessageUtils;
+import com.practice.server.application.utils.Utils;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.Collections;
+import java.util.Optional;
+
+import static com.practice.server.application.constants.Constants.*;
 
 @Service
 public class UserService implements IUserService {
 
-    private static final String USER_404 = "User not found";
+    @Value("${google.client-id}")
+    private String googleClientId;
 
     private final UsersRepository userRepository;
 
@@ -50,19 +63,21 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
         user.setCreatedAt(LocalDateTime.now());
-
-        User user1 = userRepository.findById(1L).orElse(null);
-        user.setProfilePicture(Objects.requireNonNull(user1).getProfilePicture());
-
+        user.setProvider(LOCAL);
         userRepository.save(user);
     }
 
     @Override
     public String login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password"));
+                .orElse(null);
+
+        if (user == null) {
+            throw new PracticeException(INVALID_CREDENTIALS, MessageUtils.getMessage(INVALID_CREDENTIALS));
+        }
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new PracticeException(INVALID_CREDENTIALS, MessageUtils.getMessage(INVALID_CREDENTIALS));
         }
 
         return jwtTokenProvider.generateToken(user.getEmail(), user.getRole());
@@ -74,10 +89,10 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("Token de refresco inválido");
         }
 
-        String username = jwtTokenProvider.getUsernameFromToken(refreshToken);
+        String email = jwtTokenProvider.getUsernameFromToken(refreshToken);
         Role role = jwtTokenProvider.getRoleFromToken(refreshToken);
 
-        return jwtTokenProvider.generateToken(username, role);
+        return jwtTokenProvider.generateToken(email, role);
     }
 
     @Override
@@ -101,6 +116,82 @@ public class UserService implements IUserService {
         return mapToDTO(user);
     }
 
+    @Override
+    public PracticeResponse handleGoogleLoginOrRegister(String idToken, HttpServletResponse response) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                    new NetHttpTransport(),
+                    GsonFactory.getDefaultInstance()
+            )
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken googleIdToken = verifier.verify(idToken);
+            if (googleIdToken == null) {
+                throw new PracticeException(INVALID_GOOGLE_TOKEN, MessageUtils.getMessage(INVALID_GOOGLE_TOKEN));
+            }
+
+            GoogleIdToken.Payload payload = googleIdToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String picture = (String) payload.get("picture");
+            boolean emailVerified = Boolean.TRUE.equals(payload.getEmailVerified());
+
+            if (!emailVerified) {
+                throw new PracticeException(GOOGLE_EMAIL_NOT_VERIFIED, MessageUtils.getMessage(GOOGLE_EMAIL_NOT_VERIFIED));
+            }
+
+            Optional<User> optionalUser = userRepository.findByEmail(email);
+            User user;
+
+            if (optionalUser.isPresent()) {
+                user = optionalUser.get();
+
+                String provider = user.getProvider();
+
+                if (provider == null || LOCAL.equalsIgnoreCase(provider)) {
+                    return new PracticeResponse(
+                            ACCOUNT_EXISTS_NEEDS_CONFIRMATION,
+                            MessageUtils.getMessage(ACCOUNT_EXISTS_NEEDS_CONFIRMATION)
+                    );
+                }
+
+                if (!GOOGLE.equalsIgnoreCase(provider)) {
+                    throw new PracticeException(
+                            INVALID_PROVIDER,
+                            MessageUtils.getMessage(INVALID_PROVIDER)
+                    );
+                }
+            } else {
+                // Create new user with Google provider
+                user = new User();
+                user.setEmail(email);
+                user.setFullName(name);
+                user.setProfilePicture(picture.getBytes(StandardCharsets.UTF_8));
+                user.setGoogleProfilePictureUrl(picture);
+                user.setProvider(GOOGLE);
+                user.setRole(Role.USER);
+                user.setCreatedAt(LocalDateTime.now());
+
+                String generatedPassword = Utils.generateSecureRandomPassword(12);
+                String encodedPassword = passwordEncoder.encode(generatedPassword);
+                user.setPassword(encodedPassword);
+
+                user = userRepository.save(user);
+            }
+
+            String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole());
+            response.setHeader(SET_COOKIE, "token=" + token + "; Secure; SameSite=Strict; Path=/; Max-Age=3600");
+
+            return new PracticeResponse(0, "Login exitoso con Google");
+
+        } catch (PracticeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PracticeException(GOOGLE_LOGIN_FAILED, MessageUtils.getMessage(GOOGLE_LOGIN_FAILED) + ": " + e.getMessage());
+        }
+    }
+
     public User getUserFromToken(String token) {
         if (token == null || token.isBlank()) {
             throw new PracticeException(400, "Token missing");
@@ -122,6 +213,7 @@ public class UserService implements IUserService {
                 user.getPhoneNumber(),
                 user.getRole(),
                 user.getProfilePicture(),
+                user.getGoogleProfilePictureUrl(),
                 user.getCreatedAt()
         );
     }

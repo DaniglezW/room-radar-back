@@ -37,6 +37,12 @@ public class User {
     @Column(columnDefinition = "bytea")
     private byte[] profilePicture;
 
+    @Column(name = "google_profile_picture_url")
+    private String googleProfilePictureUrl;
+
+    @Column()
+    private String provider;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
