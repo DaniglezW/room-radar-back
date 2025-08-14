@@ -1,6 +1,8 @@
 package com.practice.server.application.service.interfaces;
 
+import com.practice.server.application.dto.HotelWithRoomsDTO;
 import com.practice.server.application.dto.LocationSuggestionDto;
+import com.practice.server.application.dto.request.HotelSearchRequest;
 import com.practice.server.application.dto.response.CountryAccommodationResponse;
 import com.practice.server.application.dto.response.HotelListResponse;
 import com.practice.server.application.dto.response.HotelResponse;
@@ -21,6 +23,8 @@ public interface IHotelService {
     HotelResponse deleteHotel(Long id);
 
     List<LocationSuggestionDto> search(String query);
+
+    List<HotelWithRoomsDTO> searchHotels(HotelSearchRequest request);
 
     HotelListResponse getTopRatedHotels(int limit);
 

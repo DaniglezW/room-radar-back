@@ -99,19 +99,7 @@ public class AuthController implements IAuthControllerAPI {
 
     @Override
     public ResponseEntity<UserResponse> getCurrentUser(@CookieValue(value = "token", required = false) String token) {
-        if (token == null || token.isBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new UserResponse(401, "Token missing"));
-        }
-        String email;
-        try {
-            email = jwtTokenProvider.getUsernameFromToken(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new UserResponse(401, "Invalid token"));
-        }
-
-        UserDTO userDTO = userService.getUserByEmail(email);
+        UserDTO userDTO = userService.getUserByToken(token);
         UserResponse response = new UserResponse(200, "User found");
         response.setUser(userDTO);
 

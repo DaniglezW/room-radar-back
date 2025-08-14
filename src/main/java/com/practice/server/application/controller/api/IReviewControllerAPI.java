@@ -5,6 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Map;
 
 import static com.practice.server.application.constants.Constants.REVIEW_API_BASE;
 
@@ -13,5 +16,11 @@ public interface IReviewControllerAPI {
 
     @GetMapping("/{id}")
     ResponseEntity<ReviewResponse> getById(@PathVariable Long id);
+
+    @GetMapping("/is-allowed")
+    ResponseEntity<Map<String, Boolean>> isReviewAllowed(
+            @RequestParam Long hotelId,
+            String token
+    );
 
 }

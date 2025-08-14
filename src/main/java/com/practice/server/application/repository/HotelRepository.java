@@ -7,10 +7,44 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
+
+    @Query("""
+    SELECT DISTINCT h
+    FROM Hotel h
+    JOIN h.rooms r
+    WHERE
+        (
+          :name IS NULL OR
+          LOWER(h.name) LIKE LOWER(CONCAT('%', :name, '%')) OR
+          LOWER(h.city) LIKE LOWER(CONCAT('%', :name, '%')) OR
+          LOWER(h.country) LIKE LOWER(CONCAT('%', :name, '%'))
+        )
+        AND (:maxGuests IS NULL OR r.maxGuests >= :maxGuests)
+        AND r.available = TRUE
+        AND (
+            (:checkIn IS NULL OR :checkOut IS NULL) OR
+            NOT EXISTS (
+                SELECT 1
+                FROM Reservation res
+                WHERE res.room = r
+                  AND res.status IN (com.practice.server.application.model.enums.ReservationStatus.PENDING, com.practice.server.application.model.enums.ReservationStatus.CONFIRMED)
+                  AND res.checkInDate < :checkOut
+                  AND res.checkOutDate > :checkIn
+            )
+        )
+""")
+    List<Hotel> searchHotels(
+            @Param("name") String name,
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut,
+            @Param("maxGuests") Integer maxGuests
+    );
 
     @Query("""
     SELECT h FROM Hotel h

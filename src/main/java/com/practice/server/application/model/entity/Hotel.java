@@ -45,6 +45,10 @@ public class Hotel {
     @JsonIgnore
     private Set<Service> services = new HashSet<>();
 
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Room> rooms = new ArrayList<>();
+
     @JsonIgnore
     @OneToMany(mappedBy = "hotel")
     private List<Review> reviews;

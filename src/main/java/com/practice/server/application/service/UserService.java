@@ -192,6 +192,20 @@ public class UserService implements IUserService {
         }
     }
 
+    @Override
+    public UserDTO getUserByToken(String token) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+        String email;
+        try {
+            email = jwtTokenProvider.getUsernameFromToken(token);
+        } catch (Exception e) {
+            return null;
+        }
+        return this.getUserByEmail(email);
+    }
+
     public User getUserFromToken(String token) {
         if (token == null || token.isBlank()) {
             throw new PracticeException(400, "Token missing");

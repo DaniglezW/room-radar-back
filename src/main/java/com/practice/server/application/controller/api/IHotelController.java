@@ -1,8 +1,10 @@
 package com.practice.server.application.controller.api;
 
 import com.practice.server.application.annotations.Authenticated;
+import com.practice.server.application.dto.HotelWithRoomsDTO;
 import com.practice.server.application.dto.LocationSuggestionDto;
 import com.practice.server.application.dto.request.AvailabilityRequest;
+import com.practice.server.application.dto.request.HotelSearchRequest;
 import com.practice.server.application.dto.response.AvailableRoomResponse;
 import com.practice.server.application.dto.response.CountryAccommodationResponse;
 import com.practice.server.application.dto.response.HotelListResponse;
@@ -40,6 +42,9 @@ public interface IHotelController {
 
     @GetMapping("/search")
     ResponseEntity<List<LocationSuggestionDto>> searchLocations(@RequestParam String query);
+
+    @PostMapping("/search")
+    List<HotelWithRoomsDTO> searchHotels(@RequestBody HotelSearchRequest request);
 
     @GetMapping("/top-rated")
     ResponseEntity<HotelListResponse> getTopRatedHotels(@RequestParam(defaultValue = "5") int limit);

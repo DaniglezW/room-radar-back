@@ -1,16 +1,22 @@
 package com.practice.server.application.service;
 
+import com.practice.server.application.dto.HotelWithRoomsDTO;
 import com.practice.server.application.dto.LocationSuggestionDto;
+import com.practice.server.application.dto.RoomViewDto;
+import com.practice.server.application.dto.request.HotelSearchRequest;
 import com.practice.server.application.dto.response.CountryAccommodationResponse;
 import com.practice.server.application.dto.response.HotelListResponse;
 import com.practice.server.application.dto.response.HotelResponse;
 import com.practice.server.application.model.entity.Hotel;
+import com.practice.server.application.model.entity.HotelImage;
 import com.practice.server.application.service.interfaces.IHotelService;
 import com.practice.server.application.repository.HotelRepository;
+import com.practice.server.application.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -103,6 +109,53 @@ public class HotelService implements IHotelService {
 
         return suggestions.stream().limit(10).toList();
     }
+
+    @Override
+    public List<HotelWithRoomsDTO> searchHotels(HotelSearchRequest request) {
+        String name = StringUtils.hasText(request.getName()) ? request.getName() : null;
+        int maxGuests = request.getMaxGuests() != null ? request.getMaxGuests() : 1;
+
+        List<Hotel> hotels = hotelRepository.searchHotels(
+                name,
+                request.getCheckInDate(),
+                request.getCheckOutDate(),
+                maxGuests
+        );
+
+        return hotels.stream().map(hotel -> {
+            List<RoomViewDto> availableRooms = hotel.getRooms().stream()
+                    .filter(room -> Boolean.TRUE.equals(room.getAvailable()))
+                    .filter(room -> room.getMaxGuests() >= maxGuests)
+                    .map(room -> RoomViewDto.builder()
+                            .id(room.getId())
+                            .type(room.getType())
+                            .pricePerNight(room.getPricePerNight())
+                            .maxGuests(room.getMaxGuests())
+                            .mainImageData(Utils.getMainRoomImageData(room.getImages()))
+                            .build())
+                    .toList();
+
+            return HotelWithRoomsDTO.builder()
+                    .id(hotel.getId())
+                    .name(hotel.getName())
+                    .address(hotel.getAddress())
+                    .city(hotel.getCity())
+                    .country(hotel.getCountry())
+                    .description(hotel.getDescription())
+                    .stars(hotel.getStars())
+                    .images(hotel.getImages().stream()
+                            .map(img -> HotelImage.builder()
+                                    .id(img.getId())
+                                    .imageData(img.getImageData())
+                                    .description(img.getDescription())
+                                    .isMain(img.getIsMain())
+                                    .build())
+                            .toList())
+                    .availableRooms(availableRooms)
+                    .build();
+        }).toList();
+    }
+
 
     @Override
     public HotelListResponse getTopRatedHotels(int limit) {

@@ -44,4 +44,9 @@ public class Reservation {
 
     private LocalDateTime createdAt;
 
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "hotel_id")
+    private Hotel hotel;
+
 }

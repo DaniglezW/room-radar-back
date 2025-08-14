@@ -14,6 +14,7 @@ public final class Constants {
     public static final String RESERVATION_API_BASE = "/api/reservation/v1";
     public static final String REVIEW_API_BASE = "/api/review/v1";
     public static final String RESERVATION_HISTORY_API_BASE = "/api/reservation-history/v1";
+    public static final String FAVORITES_API_BASE = "/api/favorites/v1";
     public static final String AUTH = "/api/auth";
     public static final String USER = "/api/user/api";
 
@@ -25,6 +26,8 @@ public final class Constants {
     public static final String LOCAL = "local";
 
     public static final long EXPIRATION_TIME = 86400000; // 1 día en milisegundos
+
+    public static final int OK = 0;
 
     public static final int ERROR_CODE = 2;
 
@@ -55,5 +58,9 @@ public final class Constants {
     public static final int ALREADY_LINKED = 111;
 
     public static final int EMAIL_MISMATCH = 112;
+
+    public static final int HOTEL_OR_USER_NOT_FOUND = 113;
+
+    public static final int FAVORITE_NOT_FOUND = 114;
 
 }

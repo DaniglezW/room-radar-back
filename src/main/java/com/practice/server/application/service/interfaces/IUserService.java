@@ -15,5 +15,6 @@ public interface IUserService {
     UserDTO getUserByUsername(String username);
     UserDTO getUserByEmail(String email);
     PracticeResponse handleGoogleLoginOrRegister(String idToken, HttpServletResponse response);
+    UserDTO getUserByToken (String token);
 
 }

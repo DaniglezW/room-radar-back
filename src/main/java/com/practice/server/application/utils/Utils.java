@@ -1,6 +1,9 @@
 package com.practice.server.application.utils;
 
+import com.practice.server.application.model.entity.RoomImage;
+
 import java.security.SecureRandom;
+import java.util.List;
 
 public class Utils {
     private Utils() {}
@@ -16,6 +19,17 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static byte[] getMainRoomImageData(List<RoomImage> images) {
+        if (images == null || images.isEmpty()) return null;
+
+        return images.stream()
+                .filter(img -> Boolean.TRUE.equals(img.getIsMain()))
+                .findFirst()
+                .or(() -> images.stream().findFirst())
+                .map(RoomImage::getImageData)
+                .orElse(null);
     }
 
 }

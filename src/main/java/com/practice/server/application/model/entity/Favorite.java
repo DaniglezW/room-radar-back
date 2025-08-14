@@ -28,4 +28,10 @@ public class Favorite {
 
     private LocalDateTime addedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        addedAt = LocalDateTime.now();
+    }
+
+
 }

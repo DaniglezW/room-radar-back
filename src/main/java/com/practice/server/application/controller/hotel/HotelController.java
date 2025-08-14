@@ -1,7 +1,9 @@
 package com.practice.server.application.controller.hotel;
 
+import com.practice.server.application.dto.HotelWithRoomsDTO;
 import com.practice.server.application.dto.LocationSuggestionDto;
 import com.practice.server.application.dto.request.AvailabilityRequest;
+import com.practice.server.application.dto.request.HotelSearchRequest;
 import com.practice.server.application.dto.response.AvailableRoomResponse;
 import com.practice.server.application.dto.response.CountryAccommodationResponse;
 import com.practice.server.application.dto.response.HotelListResponse;
@@ -65,6 +67,11 @@ public class HotelController implements IHotelController {
     @Override
     public ResponseEntity<List<LocationSuggestionDto>> searchLocations(@RequestParam String query) {
         return ResponseEntity.ok(hotelService.search(query));
+    }
+
+    @Override
+    public List<HotelWithRoomsDTO> searchHotels(HotelSearchRequest request) {
+        return hotelService.searchHotels(request);
     }
 
     @Override

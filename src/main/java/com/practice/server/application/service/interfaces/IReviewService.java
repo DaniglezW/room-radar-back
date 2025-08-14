@@ -6,4 +6,6 @@ public interface IReviewService {
 
     ReviewResponse reviewByHotelId(Long hotelId);
 
+    Boolean canUserReviewHotel(Long hotelId, String token);
+
 }
