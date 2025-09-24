@@ -7,32 +7,25 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "favorites")
+@Table(name = "review_criteria")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Favorite {
+public class ReviewCriteria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Double rating; // 0 a 10
+
+    @ManyToOne
     @JsonIgnore
-    @ManyToOne(optional = false)
-    private User user;
+    private Review review;
 
-    @ManyToOne(optional = false)
-    private Hotel hotel;
-
-    private LocalDateTime addedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        addedAt = LocalDateTime.now();
-    }
+    @ManyToOne
+    private CriteriaDefinition criteriaDefinition;
 
 }

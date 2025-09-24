@@ -3,6 +3,7 @@ package com.practice.server.application.service.interfaces;
 import com.practice.server.application.dto.UserDTO;
 import com.practice.server.application.dto.request.LoginRequest;
 import com.practice.server.application.dto.request.RegisterRequest;
+import com.practice.server.application.dto.request.UpdateUserRequest;
 import com.practice.server.application.dto.response.PracticeResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -16,5 +17,6 @@ public interface IUserService {
     UserDTO getUserByEmail(String email);
     PracticeResponse handleGoogleLoginOrRegister(String idToken, HttpServletResponse response);
     UserDTO getUserByToken (String token);
+    UserDTO updateUser(UpdateUserRequest request, String token);
 
 }

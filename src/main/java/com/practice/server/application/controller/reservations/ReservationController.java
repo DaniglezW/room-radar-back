@@ -8,6 +8,7 @@ import com.practice.server.application.dto.response.ReservationListResponse;
 import com.practice.server.application.dto.response.ReservationResponse;
 import com.practice.server.application.model.entity.Reservation;
 import com.practice.server.application.service.interfaces.IReservationService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,10 +76,17 @@ public class ReservationController implements IReservationController {
     }
 
     @Override
-    public ResponseEntity<ReservationResponse> createReservation(ReservationRequest request, String token) {
-        Reservation reservation = reservationService.createReservation(request, token);
+    public ResponseEntity<ReservationResponse> createReservation(ReservationRequest request, String token,  HttpServletRequest httpServletRequest) {
+        Reservation reservation = reservationService.createReservation(request, token, httpServletRequest);
         ReservationResponse response = mapToDto(reservation);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public ResponseEntity<ReservationListResponse> getMyReservations(String token, String status) {
+        return ResponseEntity.ok(
+                new ReservationListResponse(0, "Mis Reservas", LocalDateTime.now(), reservationService.getMyReservations(token,status))
+        );
     }
 
     private ReservationResponse mapToDto(Reservation reservation) {

@@ -18,6 +18,11 @@ public class ServiceController implements IServiceController {
     private final IService iService;
 
     @Override
+    public ResponseEntity<List<Service>> getAllServices() {
+        return ResponseEntity.ok(iService.getAllServices());
+    }
+
+    @Override
     public ResponseEntity<List<Service>> getServicesByHotel(Long hotelId) {
         return ResponseEntity.ok(iService.getHotelServices(hotelId));
     }

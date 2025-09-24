@@ -5,6 +5,7 @@ import com.practice.server.application.dto.response.PracticeResponse;
 import com.practice.server.application.dto.response.ReservationListResponse;
 import com.practice.server.application.dto.response.ReservationResponse;
 import com.practice.server.application.model.entity.Reservation;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,14 @@ public interface IReservationController {
     @PostMapping
     ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationRequest request,
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            HttpServletRequest httpServletRequest
+    );
+
+    @GetMapping("/me")
+    ResponseEntity<ReservationListResponse> getMyReservations(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(required = false) String status
     );
 
 }

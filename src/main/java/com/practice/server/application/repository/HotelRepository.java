@@ -1,5 +1,6 @@
 package com.practice.server.application.repository;
 
+import com.practice.server.application.dto.HotelRatingProjection;
 import com.practice.server.application.model.entity.Hotel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -47,6 +48,43 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     );
 
     @Query("""
+        SELECT h
+        FROM Hotel h
+        JOIN h.rooms r
+        WHERE
+            (:name IS NULL OR LOWER(h.name) LIKE LOWER(CONCAT('%', :name, '%'))
+                OR LOWER(h.city) LIKE LOWER(CONCAT('%', :name, '%'))
+                OR LOWER(h.country) LIKE LOWER(CONCAT('%', :name, '%')))
+            AND (:maxGuests IS NULL OR r.maxGuests >= :maxGuests)
+            AND r.available = TRUE
+            AND ((:checkIn IS NULL OR :checkOut IS NULL) OR
+                 NOT EXISTS (
+                     SELECT 1
+                     FROM Reservation res
+                     WHERE res.room = r
+                       AND res.status IN (com.practice.server.application.model.enums.ReservationStatus.PENDING, com.practice.server.application.model.enums.ReservationStatus.CONFIRMED)
+                       AND res.checkInDate < :checkOut
+                       AND res.checkOutDate > :checkIn
+                 ))
+            AND (:serviceCount = 0 OR h.id IN (
+                SELECT h2.id
+                FROM Hotel h2
+                JOIN h2.services s2
+                WHERE s2.id IN :serviceIds
+                GROUP BY h2.id
+                HAVING COUNT(DISTINCT s2.id) = :serviceCount
+            ))
+        """)
+    List<Hotel> searchHotelsWithServices(
+            @Param("name") String name,
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut,
+            @Param("maxGuests") Integer maxGuests,
+            @Param("serviceIds") List<Long> serviceIds,
+            @Param("serviceCount") Long serviceCount
+    );
+
+    @Query("""
     SELECT h FROM Hotel h
     WHERE LOWER(h.name) LIKE LOWER(CONCAT('%', :query, '%'))
        OR LOWER(h.city) LIKE LOWER(CONCAT('%', :query, '%'))
@@ -59,7 +97,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     FROM Hotel h
     JOIN Review r ON r.hotel = h
     GROUP BY h
-    ORDER BY AVG(r.rating) DESC
+    ORDER BY AVG(r.overallRating) DESC
     """)
     List<Hotel> findTopRatedHotels(Pageable pageable);
 
@@ -103,5 +141,15 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     List<Hotel> findByStarsGreaterThanEqualAndCity(Integer stars, String city);
 
     Long countByCountry(String country);
+
+    @Query("""
+    SELECT h.id AS hotelId, COALESCE(AVG(r.overallRating), 0.0) AS avgRating
+    FROM Hotel h
+    LEFT JOIN Review r ON r.hotel = h
+    WHERE h.id IN :hotelIds
+    GROUP BY h.id
+""")
+    List<HotelRatingProjection> findAverageRatingForHotels(@Param("hotelIds") List<Long> hotelIds);
+
 
 }

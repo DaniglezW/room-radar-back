@@ -3,19 +3,23 @@ package com.practice.server.application.service;
 import com.practice.server.application.dto.request.ReservationRequest;
 import com.practice.server.application.exception.PracticeException;
 import com.practice.server.application.model.entity.Reservation;
+import com.practice.server.application.model.entity.ReservationHistory;
 import com.practice.server.application.model.entity.Room;
 import com.practice.server.application.model.entity.User;
+import com.practice.server.application.model.enums.ReservationAction;
 import com.practice.server.application.model.enums.ReservationStatus;
 import com.practice.server.application.repository.ReservationRepository;
 import com.practice.server.application.repository.RoomRepository;
 import com.practice.server.application.service.interfaces.IReservationService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +32,8 @@ public class ReservationService implements IReservationService {
     private final AvailabilityService availabilityService;
 
     private final UserService userService;
+
+    private final ReservationHistoryService reservationHistoryService;
 
     @Override
     public List<Reservation> findAll() {
@@ -76,9 +82,14 @@ public class ReservationService implements IReservationService {
     }
 
     @Override
-    public Reservation createReservation(ReservationRequest request, String token) {
+    public Reservation createReservation(ReservationRequest request, String token,  HttpServletRequest httpServletRequest) {
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        String ipAddress = httpServletRequest.getHeader("X-FORWARDED-FOR");
+        if (ipAddress == null) {
+            ipAddress = httpServletRequest.getRemoteAddr();
+        }
 
         // Validar capacidad
         if (request.getGuests() > room.getMaxGuests()) {
@@ -94,6 +105,7 @@ public class ReservationService implements IReservationService {
         }
 
         long numberOfNights = ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate());
+        numberOfNights = Math.max(numberOfNights, 1);
         double totalPrice = room.getPricePerNight() * numberOfNights;
 
         User user = userService.getUserFromToken(token);
@@ -104,12 +116,45 @@ public class ReservationService implements IReservationService {
                 .checkInDate(request.getCheckInDate())
                 .checkOutDate(request.getCheckOutDate())
                 .guests(request.getGuests())
+                .guestNames(String.join(",", request.getGuestNames()))
+                .guestEmail(request.getGuestEmail())
+                .guestPhone(request.getGuestPhone())
+                .paymentMethod(request.getPaymentMethod())
+                .cardNumber("**** " + request.getCardNumber().substring(request.getCardNumber().length() - 4)) // Solo últimos 4 dígitos
                 .totalPrice(totalPrice)
-                .status(ReservationStatus.PENDING)
+                .status(ReservationStatus.CONFIRMED)
                 .createdAt(LocalDateTime.now())
+                .confirmationCode(UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                .hotel(room.getHotel())
                 .build();
 
-        return reservationRepository.save(reservation);
+        Reservation result = reservationRepository.save(reservation);
+
+        ReservationHistory history = ReservationHistory.builder()
+                .reservation(reservation)
+                .user(user)
+                .action(ReservationAction.CREATED)
+                .actionDate(LocalDateTime.now())
+                .ipAddress(ipAddress)
+                .details("Reserva creada: " + reservation.getGuestNames() +
+                        ", " + reservation.getGuests() + " huéspedes, total: " + totalPrice + "€")
+                .build();
+        reservationHistoryService.save(history);
+        return result;
+    }
+
+    @Override
+    public List<Reservation> getMyReservations(String token, String status) {
+        User user = userService.getUserFromToken(token);
+
+        List<Reservation> reservations;
+        if (status != null) {
+            reservations = reservationRepository.findByUserIdAndStatus(user.getId(), ReservationStatus.valueOf(status));
+        } else {
+            reservations = reservationRepository.findByUserId(user.getId());
+        }
+
+        return reservations;
     }
 
 }

@@ -12,7 +12,7 @@ import static com.practice.server.application.constants.Constants.USER;
 @RequestMapping(USER)
 public interface IUserControllerAPI {
 
-    @PutMapping("/me")
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateUserRequest request);
+    @PutMapping
+    ResponseEntity<UserDTO> updateUser(@RequestBody UpdateUserRequest request, String token);
 
 }

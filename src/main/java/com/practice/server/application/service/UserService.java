@@ -7,6 +7,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.practice.server.application.dto.UserDTO;
 import com.practice.server.application.dto.request.LoginRequest;
 import com.practice.server.application.dto.request.RegisterRequest;
+import com.practice.server.application.dto.request.UpdateUserRequest;
 import com.practice.server.application.dto.response.PracticeResponse;
 import com.practice.server.application.exception.PracticeException;
 import com.practice.server.application.utils.JwtTokenProvider;
@@ -206,11 +207,35 @@ public class UserService implements IUserService {
         return this.getUserByEmail(email);
     }
 
+    @Override
+    public UserDTO updateUser(UpdateUserRequest request, String token) {
+        try {
+            UserDTO currentUser = getUserByToken(token);
+            User user = userRepository.findById(currentUser.getId())
+                    .orElseThrow(() -> new PracticeException(USER_NOT_FOUND, MessageUtils.getMessage(USER_NOT_FOUND)));
+
+            Optional.ofNullable(request.getFullName()).ifPresent(user::setFullName);
+            Optional.ofNullable(request.getPhoneNumber()).ifPresent(user::setPhoneNumber);
+            Optional.ofNullable(request.getProfilePicture()).ifPresent(user::setProfilePicture);
+
+            userRepository.save(user);
+
+            return mapToDTO(user);
+        } catch (PracticeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PracticeException(ERROR_CODE, MessageUtils.getMessage(ERROR_CODE) + ": " + e.getMessage());
+        }
+    }
+
     public User getUserFromToken(String token) {
         if (token == null || token.isBlank()) {
             throw new PracticeException(400, "Token missing");
         }
         try {
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
             String username = jwtTokenProvider.getUsernameFromToken(token);
             return userRepository.findByEmail(username)
                     .orElseThrow(() -> new RuntimeException(USER_404));

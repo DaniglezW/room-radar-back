@@ -13,6 +13,9 @@ import static com.practice.server.application.constants.Constants.SERVICES_API_B
 @RequestMapping(SERVICES_API_BASE)
 public interface IServiceController {
 
+    @GetMapping()
+    ResponseEntity<List<Service>> getAllServices();
+
     @GetMapping("/{hotelId}")
     ResponseEntity<List<Service>> getServicesByHotel(@PathVariable Long hotelId);
 

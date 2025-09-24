@@ -16,7 +16,7 @@ public final class Constants {
     public static final String RESERVATION_HISTORY_API_BASE = "/api/reservation-history/v1";
     public static final String FAVORITES_API_BASE = "/api/favorites/v1";
     public static final String AUTH = "/api/auth";
-    public static final String USER = "/api/user/api";
+    public static final String USER = "/api/user/v1";
 
 
     public static final String SET_COOKIE = "Set-Cookie";

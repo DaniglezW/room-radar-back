@@ -9,7 +9,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://ep-quiet-brook-abf62bd9-pooler.eu-west-2.aws.neon.tech:5432/neondb?sslmode=require
+    url: jdbc:postgresql://ep-quiet-brook-abf62bd9-pooler.eu-west-2.aws.neon.tech:5432/neondb?sslmode=require&ssl=true
     username: neondb_owner
     password: npg_gv50wKmzYyAs
     driver-class-name: org.postgresql.Driver

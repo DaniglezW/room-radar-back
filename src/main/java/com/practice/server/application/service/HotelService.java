@@ -1,5 +1,6 @@
 package com.practice.server.application.service;
 
+import com.practice.server.application.dto.HotelRatingProjection;
 import com.practice.server.application.dto.HotelWithRoomsDTO;
 import com.practice.server.application.dto.LocationSuggestionDto;
 import com.practice.server.application.dto.RoomViewDto;
@@ -19,9 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -114,13 +114,29 @@ public class HotelService implements IHotelService {
     public List<HotelWithRoomsDTO> searchHotels(HotelSearchRequest request) {
         String name = StringUtils.hasText(request.getName()) ? request.getName() : null;
         int maxGuests = request.getMaxGuests() != null ? request.getMaxGuests() : 1;
+        List<Long> serviceIds = request.getServiceIds() != null ? request.getServiceIds() : new ArrayList<>();
+        long serviceCount = serviceIds.size();
 
-        List<Hotel> hotels = hotelRepository.searchHotels(
+        List<Hotel> hotels = hotelRepository.searchHotelsWithServices(
                 name,
                 request.getCheckInDate(),
                 request.getCheckOutDate(),
-                maxGuests
+                maxGuests,
+                serviceIds,
+                serviceCount
         );
+
+        List<Long> hotelIds = hotels.stream().map(Hotel::getId).toList();
+
+        Map<Long, Double> hotelRatings = hotelRepository.findAverageRatingForHotels(hotelIds)
+                .stream()
+                .collect(Collectors.toMap(HotelRatingProjection::getHotelId, HotelRatingProjection::getAvgRating));
+
+        hotels.sort((h1, h2) -> {
+            Double rating1 = hotelRatings.getOrDefault(h1.getId(), 0.0);
+            Double rating2 = hotelRatings.getOrDefault(h2.getId(), 0.0);
+            return rating2.compareTo(rating1); // desc
+        });
 
         return hotels.stream().map(hotel -> {
             List<RoomViewDto> availableRooms = hotel.getRooms().stream()
@@ -152,6 +168,7 @@ public class HotelService implements IHotelService {
                                     .build())
                             .toList())
                     .availableRooms(availableRooms)
+                    .overallRating(hotelRatings.getOrDefault(hotel.getId(), 0.0))
                     .build();
         }).toList();
     }

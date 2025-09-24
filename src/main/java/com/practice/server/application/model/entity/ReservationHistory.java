@@ -1,5 +1,6 @@
 package com.practice.server.application.model.entity;
 
+import com.practice.server.application.model.enums.ReservationAction;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,14 @@ public class ReservationHistory {
     private Long id;
 
     private LocalDateTime actionDate;
-    private String action; // Ej: "CREATED", "UPDATED", "CANCELLED"
+
+    @Enumerated(EnumType.STRING)
+    private ReservationAction action; // Ej: "CREATED", "UPDATED", "CANCELLED"
+
+    private String ipAddress;
+
+    @Column(length = 1000)
+    private String details;
 
     @ManyToOne
     private Reservation reservation;

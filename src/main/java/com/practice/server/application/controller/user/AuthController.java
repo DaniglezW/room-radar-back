@@ -9,7 +9,6 @@ import com.practice.server.application.dto.request.RegisterRequest;
 import com.practice.server.application.dto.response.PracticeResponse;
 import com.practice.server.application.dto.response.UserResponse;
 import com.practice.server.application.controller.api.IAuthControllerAPI;
-import com.practice.server.application.utils.JwtTokenProvider;
 import com.practice.server.application.service.interfaces.IUserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +32,9 @@ public class AuthController implements IAuthControllerAPI {
 
     private final IUserService userService;
 
-    private final JwtTokenProvider jwtTokenProvider;
-
     @Autowired
-    public AuthController(IUserService userService, JwtTokenProvider jwtTokenProvider) {
+    public AuthController(IUserService userService) {
         this.userService = userService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override

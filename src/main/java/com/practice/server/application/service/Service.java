@@ -22,4 +22,10 @@ public class Service implements IService {
         List<com.practice.server.application.model.entity.Service> services = serviceRepository.findByHotels_Id(hotelId);
         return services != null ? services : Collections.emptyList();
     }
+
+    @Override
+    public List<com.practice.server.application.model.entity.Service> getAllServices() {
+        return serviceRepository.findAll();
+    }
+
 }

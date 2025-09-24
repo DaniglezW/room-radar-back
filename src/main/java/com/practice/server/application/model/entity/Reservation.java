@@ -29,6 +29,17 @@ public class Reservation {
 
     private Double totalPrice;
 
+    @Column(length = 500)
+    private String guestNames;
+
+    private String guestEmail;
+    private String guestPhone;
+
+    private String paymentMethod;
+    private String cardNumber;
+
+    private String confirmationCode;
+
     @Enumerated(EnumType.STRING)
     private ReservationStatus status; // PENDING, CONFIRMED, CANCELLED.
 

@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "reviews")
@@ -21,8 +23,12 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer rating; // 1 a 5
+    @Column(nullable = false)
+    private Double overallRating;
+
+    @Column(length = 1000)
     private String comment;
+
     private LocalDateTime createdAt;
 
     @ManyToOne
@@ -37,5 +43,8 @@ public class Review {
     @ManyToOne
     @JsonIgnore
     private Reservation reservation;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewCriteria> criteriaRatings = new ArrayList<>();
 
 }

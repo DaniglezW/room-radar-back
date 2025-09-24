@@ -19,5 +19,6 @@ public class HotelWithRoomsDTO {
     private Integer stars;
     private List<HotelImage> images;
     private List<RoomViewDto> availableRooms;
+    private Double overallRating;
 
 }

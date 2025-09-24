@@ -8,4 +8,6 @@ public interface IService {
 
     List<Service> getHotelServices (Long hotelId);
 
+    List<Service> getAllServices();
+
 }

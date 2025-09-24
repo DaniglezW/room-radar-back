@@ -1,6 +1,5 @@
 package com.practice.server.application.dto.response;
 
-import com.practice.server.application.dto.ShowReview;
 import lombok.*;
 
 import java.time.LocalDateTime;

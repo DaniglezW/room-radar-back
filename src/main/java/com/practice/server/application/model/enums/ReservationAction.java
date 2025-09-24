@@ -1,8 +1,8 @@
 package com.practice.server.application.model.enums;
 
-public enum ReservationStatus {
-    PENDING,
-    CONFIRMED,
+public enum ReservationAction {
+    CREATED,
+    UPDATED,
     CANCELLED,
     COMPLETED
 }

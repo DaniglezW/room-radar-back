@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class HotelSearchRequest {
@@ -17,5 +18,7 @@ public class HotelSearchRequest {
     private LocalDate checkOutDate;
 
     private Integer maxGuests;
+
+    private List<Long> serviceIds;
 
 }
