@@ -69,7 +69,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public String login(LoginRequest request) {
+    public String login(LoginRequest request, HttpServletResponse response) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElse(null);
 
@@ -80,8 +80,9 @@ public class UserService implements IUserService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new PracticeException(INVALID_CREDENTIALS, MessageUtils.getMessage(INVALID_CREDENTIALS));
         }
-
-        return jwtTokenProvider.generateToken(user.getEmail(), user.getRole());
+        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole());
+        response.setHeader(SET_COOKIE, "token=" + token + "; Secure; SameSite=Strict; Path=/; Max-Age=3600");
+        return token;
     }
 
     @Override

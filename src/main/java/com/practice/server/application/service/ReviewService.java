@@ -85,9 +85,13 @@ public class ReviewService implements IReviewService {
     @Override
     public Boolean canUserReviewHotel(Long hotelId, String token) {
         Long userId = getUserIdByToken(token);
-        return reservationRepository.existsByUserIdAndHotelIdAndCheckOutDateBefore(
+        boolean hasPastReservation = reservationRepository.existsByUserIdAndHotelIdAndCheckOutDateLessThanEqual(
                 userId, hotelId, LocalDate.now()
         );
+
+        boolean hasAlreadyReviewed = reviewRepository.existsByUserIdAndHotelId(userId, hotelId);
+
+        return hasPastReservation && !hasAlreadyReviewed;
     }
 
     @Override
@@ -144,7 +148,7 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public List<CriteriaDefinitionResponse> getCriteriaByHotel(Long hotelId) {
+    public List<CriteriaDefinitionResponse> getCriterials() {
         List<CriteriaDefinition> criteria = criteriaDefinitionRepository.findByActiveTrue();
         return criteria.stream()
                 .map(c -> new CriteriaDefinitionResponse(c.getId(), c.getName()))

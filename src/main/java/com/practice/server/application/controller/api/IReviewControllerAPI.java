@@ -36,8 +36,8 @@ public interface IReviewControllerAPI {
             @RequestHeader("Authorization") String token
     );
 
-    @GetMapping("/criteria/{hotelId}")
-    ResponseEntity<List<CriteriaDefinitionResponse>> getCriteriaByHotel(@PathVariable Long hotelId);
+    @GetMapping("/criteria")
+    ResponseEntity<List<CriteriaDefinitionResponse>> getCriterials();
 
     @GetMapping("/hotel/{hotelId}/stats")
     ResponseEntity<ReviewStatsResponse> getHotelReviewStats(@PathVariable Long hotelId);

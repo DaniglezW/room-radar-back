@@ -17,7 +17,7 @@ public interface IReviewService {
 
     void deleteReview(Long id, String token);
 
-    List<CriteriaDefinitionResponse> getCriteriaByHotel(Long hotelId);
+    List<CriteriaDefinitionResponse> getCriterials();
 
     ReviewStatsResponse getHotelReviewStats(Long hotelId);
 

@@ -54,11 +54,8 @@ public class ReviewController implements IReviewControllerAPI {
     }
 
     @Override
-    public ResponseEntity<List<CriteriaDefinitionResponse>> getCriteriaByHotel(
-            @PathVariable Long hotelId
-    ) {
-        List<CriteriaDefinitionResponse> response = iReviewService.getCriteriaByHotel(hotelId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<List<CriteriaDefinitionResponse>> getCriterials() {
+        return ResponseEntity.ok(iReviewService.getCriterials());
     }
 
     @Override

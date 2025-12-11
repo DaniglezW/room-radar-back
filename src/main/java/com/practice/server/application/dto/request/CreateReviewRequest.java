@@ -8,7 +8,6 @@ import java.util.List;
 public class CreateReviewRequest {
 
     private Long hotelId;
-    private Long reservationId;
     private String comment;
     private Double overallRating;
     private List<CreateReviewCriteriaRequest> criteriaRatings;

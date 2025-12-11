@@ -1,11 +1,9 @@
 package com.practice.server.application.service;
 
 import com.practice.server.application.dto.request.ReservationRequest;
+import com.practice.server.application.dto.response.ReservationResponseDTO;
 import com.practice.server.application.exception.PracticeException;
-import com.practice.server.application.model.entity.Reservation;
-import com.practice.server.application.model.entity.ReservationHistory;
-import com.practice.server.application.model.entity.Room;
-import com.practice.server.application.model.entity.User;
+import com.practice.server.application.model.entity.*;
 import com.practice.server.application.model.enums.ReservationAction;
 import com.practice.server.application.model.enums.ReservationStatus;
 import com.practice.server.application.repository.ReservationRepository;
@@ -34,6 +32,8 @@ public class ReservationService implements IReservationService {
     private final UserService userService;
 
     private final ReservationHistoryService reservationHistoryService;
+
+    private final EmailService emailService;
 
     @Override
     public List<Reservation> findAll() {
@@ -91,24 +91,22 @@ public class ReservationService implements IReservationService {
             ipAddress = httpServletRequest.getRemoteAddr();
         }
 
-        // Validar capacidad
         if (request.getGuests() > room.getMaxGuests()) {
-            throw new PracticeException(200, "Too many guests for this room");
+            throw new PracticeException(2, "Máximo de huéspedes superado");
         }
 
-        // Validar disponibilidad
         boolean available = availabilityService.isAvailable(
                 room, request.getCheckInDate(), request.getCheckOutDate());
 
         if (!available) {
-            throw new PracticeException(2, "Room is not available in selected dates");
+            throw new PracticeException(2, "Habitación no disponible en las fechas indicadas");
         }
 
         long numberOfNights = ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate());
         numberOfNights = Math.max(numberOfNights, 1);
         double totalPrice = room.getPricePerNight() * numberOfNights;
 
-        User user = userService.getUserFromToken(token);
+        User user = getUserIfLoggedIn(token);
 
         Reservation reservation = Reservation.builder()
                 .room(room)
@@ -130,6 +128,12 @@ public class ReservationService implements IReservationService {
 
         Reservation result = reservationRepository.save(reservation);
 
+        emailService.sendHtmlEmail(
+                reservation.getGuestEmail(),
+                "Tu reserva en " + reservation.getHotel().getName(),
+                emailService.buildReservationEmail(reservation.getGuestNames(), reservation)
+        );
+
         ReservationHistory history = ReservationHistory.builder()
                 .reservation(reservation)
                 .user(user)
@@ -144,7 +148,7 @@ public class ReservationService implements IReservationService {
     }
 
     @Override
-    public List<Reservation> getMyReservations(String token, String status) {
+    public List<ReservationResponseDTO> getMyReservations(String token, String status) {
         User user = userService.getUserFromToken(token);
 
         List<Reservation> reservations;
@@ -154,7 +158,45 @@ public class ReservationService implements IReservationService {
             reservations = reservationRepository.findByUserId(user.getId());
         }
 
-        return reservations;
+        return reservations.stream()
+                .map(reservation -> ReservationResponseDTO.builder()
+                        .id(reservation.getId())
+                        .checkInDate(reservation.getCheckInDate())
+                        .checkOutDate(reservation.getCheckOutDate())
+                        .guests(reservation.getGuests())
+                        .totalPrice(reservation.getTotalPrice())
+                        .guestNames(reservation.getGuestNames())
+                        .guestEmail(reservation.getGuestEmail())
+                        .guestPhone(reservation.getGuestPhone())
+                        .paymentMethod(reservation.getPaymentMethod())
+                        .cardNumber(reservation.getCardNumber())
+                        .confirmationCode(reservation.getConfirmationCode())
+                        .status(reservation.getStatus())
+                        .createdAt(reservation.getCreatedAt())
+                        .hotelId(reservation.getHotel().getId())
+                        .hotelName(reservation.getHotel().getName())
+                        .mainImage(extractMainImage(reservation.getHotel()))
+                        .build())
+                .toList();
+    }
+
+    private byte[] extractMainImage(Hotel hotel) {
+        return hotel.getImages().stream()
+                .filter(HotelImage::getIsMain)
+                .findFirst()
+                .map(HotelImage::getImageData)
+                .orElse(null);
+    }
+
+    private User getUserIfLoggedIn(String token) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+        try {
+            return userService.getUserFromToken(token);
+        } catch (PracticeException e) {
+            return null;
+        }
     }
 
 }

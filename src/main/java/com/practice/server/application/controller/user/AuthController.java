@@ -52,16 +52,8 @@ public class AuthController implements IAuthControllerAPI {
     public ResponseEntity<PracticeResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         log.info("Entering into login controller");
         try {
-            String token = userService.login(request);
-            ResponseCookie cookie = ResponseCookie.from("token", token)
-                    .httpOnly(true)
-                    .secure(false)
-                    .sameSite("Strict")
-                    .path("/")
-                    .maxAge(Duration.ofHours(1))
-                    .build();
-
-            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            String token = userService.login(request, response);
+            log.info("Login successful with token = {}", token);
             return ResponseEntity.ok(new PracticeResponse(0,"Successful login"));
         } catch (Exception e) {
             throw new PracticeException(Constants.ERROR_CODE, "Error during login: " + e.getMessage());

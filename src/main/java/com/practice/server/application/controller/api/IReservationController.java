@@ -2,6 +2,7 @@ package com.practice.server.application.controller.api;
 
 import com.practice.server.application.dto.request.ReservationRequest;
 import com.practice.server.application.dto.response.PracticeResponse;
+import com.practice.server.application.dto.response.ReservationListAndImageResponse;
 import com.practice.server.application.dto.response.ReservationListResponse;
 import com.practice.server.application.dto.response.ReservationResponse;
 import com.practice.server.application.model.entity.Reservation;
@@ -38,12 +39,12 @@ public interface IReservationController {
     @PostMapping
     ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationRequest request,
-            @RequestHeader("Authorization") String token,
+            @RequestHeader(value = "Authorization", required = false) String token,
             HttpServletRequest httpServletRequest
     );
 
     @GetMapping("/me")
-    ResponseEntity<ReservationListResponse> getMyReservations(
+    ResponseEntity<ReservationListAndImageResponse> getMyReservations(
             @RequestHeader("Authorization") String token,
             @RequestParam(required = false) String status
     );

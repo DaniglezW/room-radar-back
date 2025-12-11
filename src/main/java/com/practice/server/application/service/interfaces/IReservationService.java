@@ -1,6 +1,7 @@
 package com.practice.server.application.service.interfaces;
 
 import com.practice.server.application.dto.request.ReservationRequest;
+import com.practice.server.application.dto.response.ReservationResponseDTO;
 import com.practice.server.application.model.entity.Reservation;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -24,6 +25,6 @@ public interface IReservationService {
 
     Reservation createReservation(ReservationRequest request, String token,  HttpServletRequest httpServletRequest);
 
-    List<Reservation> getMyReservations(String token, String status);
+    List<ReservationResponseDTO> getMyReservations(String token, String status);
 
 }

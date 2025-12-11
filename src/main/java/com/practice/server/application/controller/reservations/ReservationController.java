@@ -4,6 +4,7 @@ import com.practice.server.application.annotations.Authenticated;
 import com.practice.server.application.controller.api.IReservationController;
 import com.practice.server.application.dto.request.ReservationRequest;
 import com.practice.server.application.dto.response.PracticeResponse;
+import com.practice.server.application.dto.response.ReservationListAndImageResponse;
 import com.practice.server.application.dto.response.ReservationListResponse;
 import com.practice.server.application.dto.response.ReservationResponse;
 import com.practice.server.application.model.entity.Reservation;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 
-@Authenticated
 @RestController
 @RequiredArgsConstructor
 public class ReservationController implements IReservationController {
@@ -24,6 +24,7 @@ public class ReservationController implements IReservationController {
     private final IReservationService reservationService;
 
     @Override
+    @Authenticated
     public ResponseEntity<ReservationListResponse> getAllReservations() {
         return ResponseEntity.ok(
                 new ReservationListResponse(0, "Listado de reservas", LocalDateTime.now(), reservationService.findAll())
@@ -31,6 +32,7 @@ public class ReservationController implements IReservationController {
     }
 
     @Override
+    @Authenticated
     public ResponseEntity<ReservationResponse> getReservationById(Long id) {
         Reservation res = reservationService.findById(id);
         return ResponseEntity.ok(
@@ -39,6 +41,7 @@ public class ReservationController implements IReservationController {
     }
 
     @Override
+    @Authenticated
     public ResponseEntity<ReservationResponse> updateReservation(Long id, Reservation reservation) {
         Reservation updated = reservationService.update(id, reservation);
         return ResponseEntity.ok(
@@ -47,6 +50,7 @@ public class ReservationController implements IReservationController {
     }
 
     @Override
+    @Authenticated
     public ResponseEntity<PracticeResponse> deleteReservation(Long id) {
         reservationService.delete(id);
         return ResponseEntity.ok(
@@ -55,6 +59,7 @@ public class ReservationController implements IReservationController {
     }
 
     @Override
+    @Authenticated
     public ResponseEntity<ReservationListResponse> getReservationsByUser(Long userId) {
         return ResponseEntity.ok(
                 new ReservationListResponse(0, "Reservas por usuario", LocalDateTime.now(), reservationService.findByUser(userId))
@@ -83,15 +88,16 @@ public class ReservationController implements IReservationController {
     }
 
     @Override
-    public ResponseEntity<ReservationListResponse> getMyReservations(String token, String status) {
+    @Authenticated
+    public ResponseEntity<ReservationListAndImageResponse> getMyReservations(String token, String status) {
         return ResponseEntity.ok(
-                new ReservationListResponse(0, "Mis Reservas", LocalDateTime.now(), reservationService.getMyReservations(token,status))
+                new ReservationListAndImageResponse(0, "Mis Reservas", LocalDateTime.now(), reservationService.getMyReservations(token,status))
         );
     }
 
     private ReservationResponse mapToDto(Reservation reservation) {
         return new ReservationResponse(
-                201,
+                0,
                 "Reservation created successfully",
                 LocalDateTime.now(),
                 reservation

@@ -17,7 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByStatus(ReservationStatus status);
     List<Reservation> findByUserIdAndStatus(Long userId, ReservationStatus status);
     List<Reservation> findByRoomAndStatus(Room room, ReservationStatus status);
-    boolean existsByUserIdAndHotelIdAndCheckOutDateBefore(Long userId, Long hotelId, LocalDate date);
+    boolean existsByUserIdAndHotelIdAndCheckOutDateLessThanEqual(Long userId, Long hotelId, LocalDate date);
 
     // Encuentra reservas con un status concreto y cuyo check-out ya haya pasado
     List<Reservation> findByStatusAndCheckOutDateBefore(ReservationStatus status, LocalDate date);

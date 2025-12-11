@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface IUserService {
 
     void register(RegisterRequest request);
-    String login(LoginRequest request);
+    String login(LoginRequest request, HttpServletResponse response);
     String refreshToken(String refreshToken);
     Boolean validateToken(String token);
     UserDTO getUserByUsername(String username);
