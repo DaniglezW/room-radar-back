@@ -19,8 +19,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -117,14 +122,23 @@ public class HotelService implements IHotelService {
         List<Long> serviceIds = request.getServiceIds() != null ? request.getServiceIds() : new ArrayList<>();
         long serviceCount = serviceIds.size();
 
+        boolean filterByDates = request.getCheckInDate() != null && request.getCheckOutDate() != null;
+        LocalDate checkIn = filterByDates ? request.getCheckInDate() : LocalDate.now();
+        LocalDate checkOut = filterByDates ? request.getCheckOutDate() : LocalDate.now().plusDays(1);
+
         List<Hotel> hotels = hotelRepository.searchHotelsWithServices(
                 name,
-                request.getCheckInDate(),
-                request.getCheckOutDate(),
+                checkIn,
+                checkOut,
+                filterByDates,
                 maxGuests,
                 serviceIds,
                 serviceCount
         );
+
+        if (hotels.isEmpty()) {
+            return List.of();
+        }
 
         List<Long> hotelIds = hotels.stream().map(Hotel::getId).toList();
 

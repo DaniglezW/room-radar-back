@@ -62,6 +62,10 @@ default:
   image:
     path: public/images/
 
+app:
+  sample-data:
+    enabled: true
+
 # Ubicación de los scripts de inicialización
 # spring.sql.init.mode: always
 # spring.sql.init.schema-locations: classpath:schema.sql

@@ -26,10 +26,10 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
           LOWER(h.city) LIKE LOWER(CONCAT('%', :name, '%')) OR
           LOWER(h.country) LIKE LOWER(CONCAT('%', :name, '%'))
         )
-        AND (:maxGuests IS NULL OR r.maxGuests >= :maxGuests)
+        AND r.maxGuests >= :maxGuests
         AND r.available = TRUE
         AND (
-            (:checkIn IS NULL OR :checkOut IS NULL) OR
+            :filterByDates = false OR
             NOT EXISTS (
                 SELECT 1
                 FROM Reservation res
@@ -44,6 +44,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             @Param("name") String name,
             @Param("checkIn") LocalDate checkIn,
             @Param("checkOut") LocalDate checkOut,
+            @Param("filterByDates") boolean filterByDates,
             @Param("maxGuests") Integer maxGuests
     );
 
@@ -55,9 +56,9 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             (:name IS NULL OR LOWER(h.name) LIKE LOWER(CONCAT('%', :name, '%'))
                 OR LOWER(h.city) LIKE LOWER(CONCAT('%', :name, '%'))
                 OR LOWER(h.country) LIKE LOWER(CONCAT('%', :name, '%')))
-            AND (:maxGuests IS NULL OR r.maxGuests >= :maxGuests)
+            AND r.maxGuests >= :maxGuests
             AND r.available = TRUE
-            AND ((:checkIn IS NULL OR :checkOut IS NULL) OR
+            AND (:filterByDates = false OR
                  NOT EXISTS (
                      SELECT 1
                      FROM Reservation res
@@ -79,9 +80,10 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             @Param("name") String name,
             @Param("checkIn") LocalDate checkIn,
             @Param("checkOut") LocalDate checkOut,
+            @Param("filterByDates") boolean filterByDates,
             @Param("maxGuests") Integer maxGuests,
             @Param("serviceIds") List<Long> serviceIds,
-            @Param("serviceCount") Long serviceCount
+            @Param("serviceCount") long serviceCount
     );
 
     @Query("""
